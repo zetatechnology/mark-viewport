@@ -1,5 +1,6 @@
 import { renderMarkdown } from './render';
 import { addCopyButtons, renderMath, renderMermaid } from './enhance';
+import { FileSaver, pickerSupported } from './save';
 import { loadSettings, onSettingsChanged, t, type Settings } from '../settings';
 
 const MARKDOWN_TYPES = ['text/plain', 'text/markdown', 'text/x-markdown'];
@@ -50,16 +51,33 @@ function main(source: string): void {
   const toc = el('aside', 'mv-toc');
   toc.append(el('div', 'mv-toc-title', t('toc')), tocNav);
 
-  const layout = el('div', 'mv-layout');
-  layout.append(toc, main);
+  const editor = el('textarea', 'mv-editor');
+  editor.spellcheck = false;
+  editor.setAttribute('aria-label', t('editorLabel'));
 
-  const tocBtn = el('button', 'mv-btn', t('toc'));
+  const layout = el('div', 'mv-layout');
+  layout.append(toc, editor, main);
+
+  const tocBtn = el('button', 'mv-btn mv-btn-toc', t('toc'));
   tocBtn.type = 'button';
   tocBtn.title = t('toggleToc');
-  const rawBtn = el('button', 'mv-btn', t('showSource'));
+  const rawBtn = el('button', 'mv-btn mv-btn-raw', t('showSource'));
   rawBtn.type = 'button';
+  const previewBtn = el('button', 'mv-btn', t('preview'));
+  previewBtn.type = 'button';
+  previewBtn.title = t('previewTitle');
+  previewBtn.hidden = true;
+  const editBtn = el('button', 'mv-btn', t('edit'));
+  editBtn.type = 'button';
+  editBtn.title = t('editTitle');
+  const saveBtn = el('button', 'mv-btn mv-btn-primary', t('save'));
+  saveBtn.type = 'button';
+  saveBtn.title = pickerSupported ? t('saveTitle') : t('saveDownloadTitle');
+  saveBtn.hidden = true;
+  const status = el('span', 'mv-status');
+  status.setAttribute('role', 'status');
   const toolbar = el('div', 'mv-toolbar');
-  toolbar.append(tocBtn, rawBtn);
+  toolbar.append(status, tocBtn, previewBtn, saveBtn, editBtn, rawBtn);
 
   for (const [name, content] of [
     ['viewport', 'width=device-width, initial-scale=1'],
@@ -160,6 +178,11 @@ function main(source: string): void {
 
   // ---- Raw toggle ----
   function toggleRaw(): void {
+    if (editing) {
+      // Toolbar icon while editing: show / hide the preview instead.
+      setPreview(!previewing);
+      return;
+    }
     const on = root.classList.toggle('mv-show-raw');
     rawBtn.textContent = on ? t('showRendered') : t('showSource');
   }
@@ -180,6 +203,179 @@ function main(source: string): void {
     }
   });
 
+
+  // ---- Editing ----
+  // `current` is the file as last read from / written to disk. Line breaks are
+  // compared as \n: the page text and the textarea both fold CRLF, and the
+  // saver writes the file's own line-break style back (see save.ts).
+  const saver = new FileSaver(location.href.split('#')[0], fileName());
+  let editing = false;
+  let saving = false;
+  let saveAgain = false;
+  let conflict = false;
+  let previewing = false;
+  let renderedText: string | null = null; // editor text the preview was last rendered from
+  const normalize = (s: string) => s.replace(/\r\n?/g, '\n');
+  const isDirty = () => normalize(current) !== editor.value;
+
+  function setStatus(text: string, kind: 'info' | 'dirty' | 'ok' | 'error' = 'info'): void {
+    status.textContent = text;
+    status.dataset.kind = kind;
+  }
+
+  /** Status after an edit: unsaved / conflict, or clear when back to the saved text. */
+  function refreshStatus(): void {
+    if (!editing) setStatus('');
+    else if (conflict) setStatus(t('changedOnDisk'), 'error');
+    else if (isDirty()) setStatus(t('unsaved'), 'dirty');
+    else if (status.dataset.kind === 'dirty') setStatus('');
+  }
+
+  function setEditing(on: boolean): void {
+    if (on === editing) return;
+    if (!on && isDirty() && !confirm(t('discardConfirm'))) return;
+    editing = on;
+    conflict = false;
+    root.classList.remove('mv-show-raw');
+    rawBtn.textContent = t('showSource');
+    root.classList.toggle('mv-editing', on);
+    editBtn.textContent = on ? t('editDone') : t('edit');
+    saveBtn.hidden = !on;
+    previewBtn.hidden = !on;
+    setPreview(false);
+    renderedText = null;
+    setStatus('');
+    if (on) {
+      editor.value = normalize(current);
+      editor.setSelectionRange(0, 0);
+      editor.focus({ preventScroll: true });
+      editor.scrollTop = 0;
+      main.scrollTop = 0;
+      saver.target().then((name) => {
+        if (editing && name && !status.textContent) setStatus(t('saveTarget') + name);
+      });
+    }
+    render(current);
+  }
+
+  /** Shows the rendered editor text in front of the editor, or goes back to the editor. */
+  function setPreview(on: boolean): void {
+    on = on && editing;
+    if (on === previewing) return;
+    previewing = on;
+    root.classList.toggle('mv-edit-preview', on);
+    previewBtn.textContent = on ? t('backToEditor') : t('preview');
+    previewBtn.classList.toggle('mv-btn-active', on);
+    if (on) {
+      if (renderedText !== editor.value) {
+        renderedText = editor.value;
+        render(renderedText);
+      }
+      // Open the preview at about the part being edited.
+      const max = editor.scrollHeight - editor.clientHeight;
+      const ratio = max > 0 ? editor.scrollTop / max : 0;
+      main.scrollTop = ratio * (main.scrollHeight - main.clientHeight);
+      main.focus({ preventScroll: true }); // arrow keys / PageDown scroll the preview
+    } else if (editing) {
+      editor.focus({ preventScroll: true });
+    }
+  }
+
+  async function save(pickNew = false): Promise<void> {
+    if (saving) {
+      // Save again once the running save is done (it may have read older text).
+      saveAgain = true;
+      return;
+    }
+    saving = true;
+    const text = editor.value;
+    setStatus(t('saving'));
+    let again = false;
+    try {
+      const res = await saver.save(text, { pickNew });
+      if (res.ok) {
+        if (res.method === 'file') {
+          current = text;
+          conflict = false;
+        }
+        const other = res.method === 'file' && res.name !== fileName() ? ` → ${res.name}` : '';
+        setStatus((res.method === 'file' ? t('saved') : t('downloaded')) + other, 'ok');
+        if (editor.value !== text) refreshStatus(); // typed while saving
+      } else if (res.cancelled) {
+        setStatus('');
+        refreshStatus();
+      } else {
+        setStatus(`${t('saveFailed')}: ${res.error}`, 'error');
+      }
+      again = saveAgain && res.ok && res.method === 'file';
+    } finally {
+      saving = false;
+      saveAgain = false;
+    }
+    if (again && editing && isDirty()) await save();
+  }
+
+  /** The file changed on disk (auto reload). */
+  function externalChange(text: string): void {
+    if (saving) return;
+    if (editing && isDirty()) {
+      // Keep the user's edits; saving will overwrite the other change.
+      if (!conflict) {
+        conflict = true;
+        refreshStatus();
+      }
+      current = text;
+      return;
+    }
+    current = text;
+    if (editing) {
+      const { selectionStart, selectionEnd, scrollTop } = editor;
+      editor.value = normalize(text);
+      editor.setSelectionRange(selectionStart, selectionEnd);
+      editor.scrollTop = scrollTop;
+      renderedText = editor.value;
+    }
+    render(text);
+  }
+
+  editBtn.addEventListener('click', () => setEditing(!editing));
+  saveBtn.addEventListener('click', (e) => save(e.shiftKey));
+  previewBtn.addEventListener('click', () => setPreview(!previewing));
+  editor.addEventListener('input', refreshStatus);
+  main.tabIndex = -1;
+
+  editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
+      e.preventDefault();
+      // execCommand keeps the native undo stack working.
+      document.execCommand('insertText', false, '  ');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && previewing) {
+      e.preventDefault();
+      setPreview(false);
+      return;
+    }
+    const mod = e.ctrlKey || e.metaKey;
+    if (!mod || e.altKey) return;
+    const key = e.key.toLowerCase();
+    if (key === 'p' && e.shiftKey && editing) {
+      e.preventDefault();
+      setPreview(!previewing);
+    } else if (key === 's' && editing) {
+      e.preventDefault();
+      save(e.shiftKey);
+    } else if (key === 'e' && !e.shiftKey) {
+      e.preventDefault();
+      setEditing(!editing);
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (editing && isDirty()) e.preventDefault();
+  });
 
   // ---- Auto reload (local files only) ----
   // Reading a file:// URL with fetch/XHR is refused by Chrome (from both the
@@ -235,10 +431,8 @@ function main(source: string): void {
         return;
       }
       failures = 0;
-      if (text !== current) {
-        current = text;
-        render(text);
-      }
+      // The page's text has CRLF already folded to LF by the HTML parser.
+      if (normalize(text) !== normalize(current)) externalChange(text);
     } finally {
       inFlight = false;
     }

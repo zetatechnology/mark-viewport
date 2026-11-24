@@ -15,6 +15,7 @@ Markdown ファイル（`.md` / `.markdown`）をブラウザ上で GitHub 風�
 - ダークモード（OS に連動 / 手動）、本文幅・文字サイズの設定
 - 「ソース」ボタンまたはツールバーアイコンで元のテキストに切替
 - ローカルファイルの自動リロード（保存すると反映）
+- 編集モード（「編集」ボタン / `Ctrl+E`）：テキストを全画面で編集し、「プレビュー」ボタン（`Ctrl+Shift+P`）で整形結果を前面に表示（`Esc` で戻る）。`Ctrl+S` でファイルに上書き保存（下記参照）
 - YAML フロントマターは折りたたんで表示
 - HTML は DOMPurify でサニタイズ（`<script>` やイベント属性は除去）
 - 日本語 / 英語 UI
@@ -45,6 +46,7 @@ npm run serve      # http://127.0.0.1:5178/sample.md で test/sample.md を text
 | `src/content/index.ts` | .md ページを検出し、ページを描画内容に置き換える（目次・切替・自動リロード） |
 | `src/content/render.ts` | markdown-it + プラグイン + highlight.js + DOMPurify |
 | `src/content/plugins.ts` | 数式・Mermaid・GitHub アラートの markdown-it プラグイン |
+| `src/content/save.ts` | 編集内容の保存（File System Access API、保存先ハンドルを IndexedDB に記憶） |
 | `src/content/enhance.ts` | 描画後の処理：コピーボタン、KaTeX / Mermaid の遅延読み込みと描画 |
 | `src/lazy/` | KaTeX と Mermaid。`dist/lazy/` に ES モジュールとして別ビルドし、該当するブロックがあるページでだけ読み込む |
 | `src/background.ts` | ツールバーボタン、ローカルファイルの再読み込み（`fetch`） |
@@ -85,3 +87,13 @@ npm run zip            # 提出用の mark-viewport.zip を生成
 ## ライセンス
 
 [MIT](LICENSE) © zetatechnology。同梱しているサードパーティのライブラリのライセンスは、ビルド時に生成される `dist/THIRD_PARTY_NOTICES.txt` を参照してください。
+
+## 編集と保存
+
+- 拡張機能から `file://` のファイルへ直接書き込むことはできないため、保存には File System Access API を使います。
+- **初回の保存**ではファイル選択ダイアログが開くので（ファイル名は入力済み）、表示中の元ファイルを選んで上書きします。選んだファイルはページの URL ごとに IndexedDB に記憶され、以降の `Ctrl+S` はそのファイルにそのまま保存されます（Chrome が書き込み許可を確認することがあります）。
+- `Shift+Ctrl+S` または Shift を押しながら「保存」で保存先を選び直せます。
+- 改行コード（CRLF / LF）は元のファイルに合わせて保存します。
+- 編集中に外部でファイルが変更された場合、未保存の変更がなければエディタに反映し、あれば警告を表示します（保存すると上書き）。
+- 未保存の変更があるまま編集を終了したりタブを閉じたりすると確認が表示されます。
+- Web 上の .md でも編集・プレビューはできます。保存するとローカルのファイルとして書き出されます。

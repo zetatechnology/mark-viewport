@@ -224,6 +224,98 @@ html.mv-active.mv-show-raw .mv-raw {
   word-break: break-word;
 }
 
+/* ---------- Edit mode ---------- */
+html.mv-active .mv-btn-active { background: var(--mv-accent-bg); color: var(--mv-link); border-color: var(--mv-link); opacity: 1; }
+html.mv-active .mv-btn-primary { font-weight: 600; color: var(--mv-link); border-color: var(--mv-link); }
+html.mv-active .mv-status {
+  align-self: center;
+  font-size: 12px;
+  color: var(--mv-muted);
+  padding: 0 4px;
+  white-space: nowrap;
+  max-width: 40vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+html.mv-active .mv-status:empty { display: none; }
+html.mv-active .mv-status[data-kind="dirty"] { color: var(--mv-warning); }
+html.mv-active .mv-status[data-kind="ok"] { color: var(--mv-tip); }
+html.mv-active .mv-status[data-kind="error"] { color: var(--mv-caution); }
+
+html.mv-active .mv-editor { display: none; }
+html.mv-active.mv-editing .mv-toc,
+html.mv-active.mv-editing .mv-btn-toc,
+html.mv-active.mv-editing .mv-btn-raw { display: none !important; }
+html.mv-active.mv-editing .mv-layout { display: block !important; }
+
+/* While editing, the toolbar is a bar of its own across the top, so the
+   editor's and the preview's scrollbars start below it instead of under it. */
+html.mv-active.mv-editing { --mv-bar-h: 44px; overflow: hidden; }
+html.mv-active.mv-editing .mv-toolbar {
+  top: 0;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  height: var(--mv-bar-h);
+  padding: 0 16px;
+  align-items: center;
+  justify-content: flex-end;
+  background: var(--mv-bg);
+  border-bottom: 1px solid var(--mv-border-muted);
+}
+html.mv-active.mv-editing .mv-status { min-width: 0; max-width: none; flex: 0 1 auto; }
+
+/* The editor fills the rest of the page; the preview opens in front of it. */
+html.mv-active.mv-editing .mv-editor {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--mv-width);
+  height: calc(100vh - var(--mv-bar-h));
+  margin: var(--mv-bar-h) auto 0;
+  padding: 24px 40px 50vh;
+  resize: none;
+  border: 0;
+  outline: none;
+  background: var(--mv-bg);
+  color: var(--mv-fg);
+  caret-color: var(--mv-link);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  tab-size: 2;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+html.mv-active.mv-editing .mv-main { display: none; }
+html.mv-active.mv-editing.mv-edit-preview .mv-main {
+  display: block;
+  position: fixed;
+  inset: var(--mv-bar-h) 0 0 0;
+  z-index: 5;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  overflow-y: auto;
+  padding: 24px 40px 96px;
+  background: var(--mv-bg);
+  outline: none;
+  animation: mv-preview-in 0.15s ease-out;
+}
+html.mv-active.mv-editing .markdown-body { max-width: var(--mv-width); margin: 0 auto; }
+@keyframes mv-preview-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@media (max-width: 900px) {
+  html.mv-active.mv-editing .mv-toolbar { padding: 0 8px; }
+  html.mv-active.mv-editing .mv-editor { padding: 16px 16px 50vh; }
+  html.mv-active.mv-editing.mv-edit-preview .mv-main { padding: 16px 16px 64px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.mv-active.mv-editing.mv-edit-preview .mv-main { animation: none; }
+}
+
 /* ---------- Markdown body (GitHub-like) ---------- */
 html.mv-active .markdown-body > :first-child { margin-top: 0 !important; }
 html.mv-active .markdown-body a { color: var(--mv-link); text-decoration: none; }
@@ -515,8 +607,11 @@ html.mv-active .hljs-deletion { color: var(--mv-hl-keyword); background: var(--m
 /* ---------- Print ---------- */
 @media print {
   html.mv-active .mv-toolbar,
-  html.mv-active .mv-toc { display: none !important; }
-  html.mv-active.mv-toc-on .mv-layout { display: block; }
+  html.mv-active .mv-toc,
+  html.mv-active .mv-editor { display: none !important; }
+  html.mv-active.mv-toc-on .mv-layout,
+  html.mv-active.mv-editing .mv-layout { display: block !important; height: auto; }
+  html.mv-active.mv-editing .mv-main { display: block !important; position: static !important; height: auto; overflow: visible; padding: 0; }
   html.mv-active .mv-main { max-width: none; padding: 0; }
   html.mv-active .markdown-body .mv-anchor,
   html.mv-active .markdown-body .mv-copy { display: none; }
