@@ -55,7 +55,9 @@ function chunk(type, data) {
   return Buffer.concat([len, td, crc]);
 }
 
-function png(size) {
+// `pad` is transparent padding in design units (the Web Store icon wants the
+// artwork at 96x96 inside a 128x128 canvas).
+function png(size, pad = 0) {
   const S = 4;
   const raw = Buffer.alloc(size * (size * 4 + 1));
   for (let py = 0; py < size; py++) {
@@ -65,8 +67,9 @@ function png(size) {
       let fg = 0;
       for (let sy = 0; sy < S; sy++) {
         for (let sx = 0; sx < S; sx++) {
-          const x = ((px + (sx + 0.5) / S) / size) * 128;
-          const y = ((py + (sy + 0.5) / S) / size) * 128;
+          const k = 128 / (128 - 2 * pad);
+          const x = (((px + (sx + 0.5) / S) / size) * 128 - pad) * k;
+          const y = (((py + (sy + 0.5) / S) / size) * 128 - pad) * k;
           if (inRoundRect(x, y, 24)) {
             bg++;
             if (isFg(x, y)) fg++;
@@ -97,4 +100,6 @@ mkdirSync('public/icons', { recursive: true });
 for (const size of [16, 32, 48, 128]) {
   writeFileSync(`public/icons/icon${size}.png`, png(size));
 }
-console.log('Icons written to public/icons/');
+mkdirSync('store/assets', { recursive: true });
+writeFileSync('store/assets/icon-store-128.png', png(128, 16));
+console.log('Icons written to public/icons/ and store/assets/');

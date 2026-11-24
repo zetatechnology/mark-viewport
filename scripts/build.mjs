@@ -2,6 +2,7 @@
 // Content scripts cannot be ES modules, so every entry is built separately.
 import { build } from 'vite';
 import { resolve } from 'node:path';
+import { writeNotices } from './notices.mjs';
 
 const watch = process.argv.includes('--watch');
 
@@ -37,4 +38,5 @@ for (const [name, entry] of entries) {
   first = false;
 }
 
-if (!watch) console.log('Built to dist/');
+const count = writeNotices('dist/THIRD_PARTY_NOTICES.txt');
+if (!watch) console.log(`Built to dist/ (${count} third-party notices)`);

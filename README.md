@@ -55,13 +55,24 @@ npm run serve      # http://127.0.0.1:5178/sample.md で test/sample.md を text
 - `raw.githubusercontent.com` はレスポンスの CSP で画像の読み込みを禁止しているため、相対パスの画像は表示されません。
 - Mermaid と数式（KaTeX）は未対応です。
 
-## Chrome Web Store 公開に向けたメモ
+## Chrome Web Store 公開
 
-- `npm run zip` で `mark-viewport.zip` が作られます（`dist/` の中身を圧縮したもの）。
+提出に必要な素材・文面・手順は [store/](store/) にまとめています。まず [store/SUBMISSION.md](store/SUBMISSION.md) を見てください。
+
+```powershell
+npm run store-assets   # スクリーンショットとプロモーション タイルを store/assets/ に生成
+npm run zip            # 提出用の mark-viewport.zip を生成
+```
+
+### 権限まわりのメモ
+
 - 権限は `storage`、`file:///*`（自動リロード用）、content script の `.md` / `.markdown` URL のみです。審査フォームに書く権限の理由:
   - **storage**：表示設定の保存
   - **ホスト権限（file:///\*）**：ローカルの Markdown ファイルを読み直して、変更を反映するため
   - **content script（\*.md, \*.markdown）**：Markdown ファイルを整形表示するため
 - リモートコードは使用していません（すべてのライブラリを同梱しています）。データの収集もありません。プライバシー欄では「データを収集しない」を選べます。
-- ストアには別途、スクリーンショット（1280×800 または 640×400）、プロモーション用タイル（440×280）、プライバシーポリシーの URL（データを収集しない旨の 1 ページで十分）が必要です。
 - 「ファイルの URL へのアクセスを許可する」はインストール後にユーザー自身が ON にする必要があります。ストアの説明文にも書いておきましょう。
+
+## ライセンス
+
+[MIT](LICENSE) © zetatechnology。同梱しているサードパーティのライブラリのライセンスは、ビルド時に生成される `dist/THIRD_PARTY_NOTICES.txt` を参照してください。

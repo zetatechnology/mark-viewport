@@ -2,6 +2,8 @@
   "name": "mark-viewport",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "repository": "github:zetatechnology/mark-viewport",
   "description": "Chrome extension that renders Markdown files (local and remote) in the browser.",
   "type": "module",
   "scripts": {
@@ -10,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "icons": "node scripts/make-icons.mjs",
     "serve": "node scripts/serve.mjs",
-    "zip": "npm run build && powershell -NoProfile -Command \"Compress-Archive -Path dist/* -DestinationPath mark-viewport.zip -Force\""
+    "store-assets": "npm run build && node scripts/store-assets.mjs",
+    "zip": "npm run build && node scripts/zip.mjs"
   },
   "dependencies": {
     "dompurify": "^3.5.0",
