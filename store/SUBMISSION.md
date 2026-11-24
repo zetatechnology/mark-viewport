@@ -12,7 +12,9 @@
 | プライバシーポリシー | `docs/privacy-policy.md` → https://zetatechnology.github.io/mark-viewport/privacy-policy/ | main に push すると GitHub Pages に自動反映 |
 | サードパーティのライセンス表記 | zip 内の `THIRD_PARTY_NOTICES.txt` | `npm run build` で自動生成 |
 
-スクリーンショットは `store/demo.md` を実際の content script で描画したものです。
+スクリーンショットは `store/demo.md`（ライト・ソース表示）と `store/demo-notes.md`（ダーク）を、実際の content script で描画したものです。
+
+`node scripts/e2e.mjs` を実行すると、ビルドした拡張機能を Edge のヘッドレスモードに読み込み、`test/sample.md` の描画結果（見出し、数式、アラートなど）を確認できます。ブラウザは環境変数 `CHROME_PATH` で指定します。Chrome 本体はコマンドラインからの拡張機能の読み込みを受け付けないため、Edge を使います。この方法では Mermaid の図は描画が終わる前に結果を取得してしまうので、図は実際のブラウザで確認してください。
 
 ## 提出前に決めること・やること
 
@@ -21,7 +23,7 @@
 - [ ] **トレーダー申告**（EU 向け）：会社として公開する場合は「トレーダー」を選び、住所・電話番号・メールアドレスを登録します（EU のユーザーに表示されます）。個人の非商用なら「非トレーダー」です。
 - [x] **プライバシーポリシーの公開 URL**：https://zetatechnology.github.io/mark-viewport/privacy-policy/ （GitHub Pages、`main` ブランチの `docs/`）
 - [ ] **連絡先**：問い合わせ先は GitHub Issues（https://github.com/zetatechnology/mark-viewport/issues）にしています。ダッシュボードの「サポート URL」にも同じ URL を設定します。
-- [ ] **バージョン**：`public/manifest.json` と `package.json` の `version`（現在 0.1.0）。最初の公開を 1.0.0 にするならここで変えて `npm run zip` し直します。
+- [x] **バージョン**：1.0.0（`public/manifest.json` と `package.json`）
 
 ## ダッシュボードでの手順
 
