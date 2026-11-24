@@ -9,7 +9,7 @@
 | スクリーンショット 1280×800 ×3 | `store/assets/screenshot-*.png` | `npm run store-assets` |
 | プロモーション タイル（小）440×280 | `store/assets/promo-small-440x280.png` | `npm run store-assets` |
 | 掲載文・権限の説明・データ使用の回答 | `store/listing.md` | — |
-| プライバシーポリシー本文 | `store/privacy-policy.md` | — |
+| プライバシーポリシー | `docs/privacy-policy.md` → https://zetatechnology.github.io/mark-viewport/privacy-policy/ | main に push すると GitHub Pages に自動反映 |
 | サードパーティのライセンス表記 | zip 内の `THIRD_PARTY_NOTICES.txt` | `npm run build` で自動生成 |
 
 スクリーンショットは `store/demo.md` を実際の content script で描画したものです。
@@ -19,11 +19,8 @@
 - [ ] **公開するアカウント**：個人アカウントか、会社（zetatechnology）として公開するか。会社で複数人が管理するなら、Google グループを使った「グループ パブリッシャー」にしておくと担当者が変わっても引き継げます。
 - [ ] **デベロッパー登録**（ご自身で）：[デベロッパー ダッシュボード](https://chrome.google.com/webstore/devconsole) で登録し、登録料（一度だけ）を支払います。Google アカウントに 2 段階認証が必要です。
 - [ ] **トレーダー申告**（EU 向け）：会社として公開する場合は「トレーダー」を選び、住所・電話番号・メールアドレスを登録します（EU のユーザーに表示されます）。個人の非商用なら「非トレーダー」です。
-- [ ] **プライバシーポリシーの公開 URL**：リポジトリは private なので、次のどれかで公開します。
-  - 会社のウェブサイトに 1 ページ置く（おすすめ）
-  - 公開用の別リポジトリ（例：`zetatechnology/mark-viewport-privacy`）を作って GitHub Pages で配信
-  - このリポジトリを public にして GitHub Pages で配信
-- [ ] **連絡先**：ポリシーの「お問い合わせ」はストア掲載ページの連絡先を指しています。サポート用のメールアドレスまたは URL をダッシュボードに設定します。
+- [x] **プライバシーポリシーの公開 URL**：https://zetatechnology.github.io/mark-viewport/privacy-policy/ （GitHub Pages、`main` ブランチの `docs/`）
+- [ ] **連絡先**：問い合わせ先は GitHub Issues（https://github.com/zetatechnology/mark-viewport/issues）にしています。ダッシュボードの「サポート URL」にも同じ URL を設定します。
 - [ ] **バージョン**：`public/manifest.json` と `package.json` の `version`（現在 0.1.0）。最初の公開を 1.0.0 にするならここで変えて `npm run zip` し直します。
 
 ## ダッシュボードでの手順

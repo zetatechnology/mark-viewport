@@ -72,8 +72,8 @@ Mark Viewport collects and sends no data. File contents are processed only insid
 
 ### 追加フィールド
 - 公式 URL：任意（Search Console で所有確認したサイトのみ選択可）
-- ホームページ URL：任意（例：GitHub リポジトリを公開する場合はその URL）
-- サポート URL：任意（問い合わせ先。未設定ならダッシュボードの連絡先メールが表示される）
+- ホームページ URL：https://github.com/zetatechnology/mark-viewport
+- サポート URL：https://github.com/zetatechnology/mark-viewport/issues
 
 ## プライバシーへの取り組み（Privacy practices タブ）
 
@@ -111,4 +111,4 @@ No. All scripts and libraries are bundled in the package.
   - 信用力の判断や融資目的で、ユーザーデータを使用、転送しない
 
 ### プライバシー ポリシー URL
-`store/privacy-policy.md` を公開した URL（公開先は SUBMISSION.md を参照）
+https://zetatechnology.github.io/mark-viewport/privacy-policy/

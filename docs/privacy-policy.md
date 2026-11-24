@@ -1,3 +1,8 @@
+---
+title: Privacy Policy
+permalink: /privacy-policy/
+---
+
 # Mark Viewport プライバシーポリシー / Privacy Policy
 
 最終更新日 / Last updated: 2026-11-24
@@ -22,7 +27,7 @@ Mark Viewport（以下「本拡張機能」）は、ブラウザで開いた Mar
 
 ### お問い合わせ
 
-本ポリシーに関するお問い合わせは、Chrome ウェブストアの掲載ページに記載のサポート窓口までご連絡ください。
+本ポリシーに関するお問い合わせは、[GitHub Issues](https://github.com/zetatechnology/mark-viewport/issues) までお寄せください。
 
 ### 改定
 
@@ -50,7 +55,7 @@ The extension uses no analytics, no advertising, and no external APIs. All libra
 
 ### Contact
 
-For questions about this policy, use the support contact listed on the extension's Chrome Web Store page.
+For questions about this policy, please open an issue on [GitHub Issues](https://github.com/zetatechnology/mark-viewport/issues).
 
 ### Changes
 
