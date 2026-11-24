@@ -32,6 +32,7 @@ Mark Viewport は、ブラウザで開いた Markdown ファイル（.md / .mark
 ・ダークモード（OS の設定に連動、または手動で切り替え）
 ・ローカルファイルを保存すると表示が自動で更新（エディタと並べてプレビューに便利）
 ・ワンクリックで元のテキスト（ソース）表示に切り替え
+・編集モード（Ctrl+E）：その場でテキストを編集し、プレビュー（Ctrl+Shift+P）で整形結果を確認。Ctrl+S で元のファイルに上書き保存（保存先は初回にファイル選択ダイアログで指定）
 ・本文の幅、文字サイズを設定で変更可能
 ・YAML フロントマターは折りたたんで表示
 
@@ -39,7 +40,7 @@ Mark Viewport は、ブラウザで開いた Markdown ファイル（.md / .mark
 インストール後、chrome://extensions を開き、Mark Viewport の「詳細」から「ファイルの URL へのアクセスを許可する」をオンにしてください。
 
 ■ プライバシー
-データの収集・送信は一切行いません。ファイルの内容は表示中のタブの中だけで処理されます。
+データの収集・送信は一切行いません。ファイルの内容は表示中のタブの中だけで処理されます。編集内容は、ユーザーが選んだファイルにのみ保存されます。
 ```
 
 ### 説明（English）
@@ -57,6 +58,7 @@ Features
 • Dark mode (follows your OS, or set it manually)
 • Auto-reloads local files when you save them — handy as a live preview next to your editor
 • One-click toggle to view the original source
+• Edit mode (Ctrl+E): edit the text in place, check the rendered result with Preview (Ctrl+Shift+P), and save back to the file with Ctrl+S (you pick the file once in a save dialog)
 • Adjustable content width and font size
 • YAML front matter is shown collapsed
 
@@ -64,7 +66,7 @@ Viewing local files
 After installing, open chrome://extensions, click "Details" on Mark Viewport, and turn on "Allow access to file URLs".
 
 Privacy
-Mark Viewport collects and sends no data. File contents are processed only inside the tab that shows them.
+Mark Viewport collects and sends no data. File contents are processed only inside the tab that shows them. Edits are saved only to the file you choose.
 ```
 
 ### 画像
@@ -83,8 +85,8 @@ Mark Viewport collects and sends no data. File contents are processed only insid
 
 ### 単一用途の説明（Single purpose）
 ```
-ブラウザで開いた Markdown ファイルを整形して表示すること。
-Render Markdown files opened in the browser as formatted documents.
+ブラウザで開いた Markdown ファイルを整形して表示し、必要に応じてその場で編集・保存できるようにすること。
+Render Markdown files opened in the browser as formatted documents, and let the user edit and save them in place.
 ```
 
 ### 権限が必要な理由（Permission justification）
