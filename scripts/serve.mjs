@@ -12,6 +12,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.json': 'application/json',
   '.png': 'image/png',
+  '.woff2': 'font/woff2',
 };
 
 createServer(async (req, res) => {

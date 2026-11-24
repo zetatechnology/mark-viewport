@@ -47,6 +47,63 @@ def fib(n: int) -> int:
 | 脚注 | ✅ | 下を参照[^1] |
 | 打ち消し線 | ✅ | ~~消した文字~~ |
 
+## Mermaid
+
+```mermaid
+flowchart LR
+  A[Markdown] --> B{content script}
+  B -->|text/plain| C[整形表示]
+  B -->|HTML| D[何もしない]
+```
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant E as Extension
+  U->>E: .md を開く
+  E-->>U: 描画結果
+```
+
+```mermaid
+graph TD
+  this is not valid -->
+```
+
+## 数式
+
+インライン数式 $E = mc^2$ と $\sqrt{a^2 + b^2}$。価格の $5 と $10 は数式になりません。
+
+$$
+\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}
+$$
+
+```math
+\sum_{k=1}^{n} k = \frac{n(n+1)}{2}
+```
+
+1 行の表示数式: $$a^2 + b^2 = c^2$$
+
+## アラート
+
+> [!NOTE]
+> 補足情報です。
+
+> [!TIP]
+> 便利なヒント。
+
+> [!IMPORTANT]
+> 重要な情報。
+
+> [!WARNING]
+> 注意が必要です。
+
+> [!CAUTION]
+> 危険な操作です。
+
+## 絵文字
+
+:tada: :rocket: :+1: は変換し、:) はそのまま。
+
 ## 引用と区切り
 
 > 引用文です。

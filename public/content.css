@@ -24,6 +24,11 @@ html.mv-active {
   --mv-hl-attr: #953800;
   --mv-hl-add-bg: #dafbe1;
   --mv-hl-del-bg: #ffebe9;
+  --mv-note: #0969da;
+  --mv-tip: #1a7f37;
+  --mv-important: #8250df;
+  --mv-warning: #9a6700;
+  --mv-caution: #d1242f;
   --mv-font-size: 16px;
   --mv-width: 980px;
   color-scheme: light;
@@ -49,6 +54,11 @@ html.mv-active[data-mv-theme="dark"] {
   --mv-hl-attr: #ffa657;
   --mv-hl-add-bg: #033a16;
   --mv-hl-del-bg: #67060c;
+  --mv-note: #4493f8;
+  --mv-tip: #3fb950;
+  --mv-important: #ab7df8;
+  --mv-warning: #d29922;
+  --mv-caution: #f85149;
   color-scheme: dark;
 }
 
@@ -74,6 +84,11 @@ html.mv-active[data-mv-theme="dark"] {
     --mv-hl-attr: #ffa657;
     --mv-hl-add-bg: #033a16;
     --mv-hl-del-bg: #67060c;
+  --mv-note: #4493f8;
+  --mv-tip: #3fb950;
+  --mv-important: #ab7df8;
+  --mv-warning: #d29922;
+  --mv-caution: #f85149;
     color-scheme: dark;
   }
 }
@@ -360,6 +375,100 @@ html.mv-active .markdown-body .footnotes {
 }
 html.mv-active .markdown-body .footnotes-sep { height: 1px; }
 
+/* ---------- Code copy button ---------- */
+html.mv-active .markdown-body .mv-code { position: relative; }
+html.mv-active .markdown-body .mv-copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 2px 8px;
+  color: var(--mv-muted);
+  background: var(--mv-bg);
+  border: 1px solid var(--mv-border);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+html.mv-active .markdown-body .mv-code:hover .mv-copy,
+html.mv-active .markdown-body .mv-copy:focus-visible,
+html.mv-active .markdown-body .mv-copy.mv-done { opacity: 1; }
+html.mv-active .markdown-body .mv-copy:hover { color: var(--mv-fg); background: var(--mv-subtle-bg); }
+html.mv-active .markdown-body .mv-copy.mv-done { color: var(--mv-tip); border-color: var(--mv-tip); }
+@media (hover: none) {
+  html.mv-active .markdown-body .mv-copy { opacity: 1; }
+}
+
+/* ---------- GitHub alerts ---------- */
+html.mv-active .markdown-body .markdown-alert {
+  margin: 0 0 16px;
+  padding: 8px 16px;
+  color: inherit;
+  border-left: 0.25em solid var(--mv-alert);
+}
+html.mv-active .markdown-body .markdown-alert > :last-child { margin-bottom: 0; }
+html.mv-active .markdown-body .markdown-alert-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--mv-alert);
+}
+html.mv-active .markdown-body .markdown-alert-title svg {
+  flex: none;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+html.mv-active .markdown-body .markdown-alert-note { --mv-alert: var(--mv-note); }
+html.mv-active .markdown-body .markdown-alert-tip { --mv-alert: var(--mv-tip); }
+html.mv-active .markdown-body .markdown-alert-important { --mv-alert: var(--mv-important); }
+html.mv-active .markdown-body .markdown-alert-warning { --mv-alert: var(--mv-warning); }
+html.mv-active .markdown-body .markdown-alert-caution { --mv-alert: var(--mv-caution); }
+
+/* ---------- Math (KaTeX) ---------- */
+html.mv-active .markdown-body .mv-math:not(.mv-math-done) {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  font-size: 85%;
+  white-space: pre-wrap;
+}
+html.mv-active .markdown-body .mv-math-block {
+  display: block;
+  margin: 0 0 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+html.mv-active .markdown-body .mv-math-block .katex-display { margin: 0; }
+html.mv-active .markdown-body .mv-math .katex { font-size: 1.1em; }
+html.mv-active .markdown-body .katex-error { color: var(--mv-caution) !important; }
+
+/* ---------- Mermaid diagrams ---------- */
+html.mv-active .markdown-body .mv-diagram {
+  margin: 0 0 16px;
+  overflow-x: auto;
+  text-align: center;
+}
+html.mv-active .markdown-body .mv-diagram > svg { max-width: 100%; height: auto; }
+html.mv-active .markdown-body .mv-diagram pre.mv-mermaid { text-align: left; color: var(--mv-muted); }
+html.mv-active .markdown-body .mv-diagram-message {
+  margin-bottom: 8px;
+  text-align: left;
+  font-size: 0.8125em;
+  color: var(--mv-caution);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  white-space: pre-wrap;
+}
+
+/* ---------- Emoji ---------- */
+html.mv-active .markdown-body .emoji { font-style: normal; }
+
 /* ---------- Syntax highlighting (highlight.js tokens) ---------- */
 html.mv-active .hljs { color: var(--mv-fg); }
 html.mv-active .hljs-doctag,
@@ -409,5 +518,6 @@ html.mv-active .hljs-deletion { color: var(--mv-hl-keyword); background: var(--m
   html.mv-active .mv-toc { display: none !important; }
   html.mv-active.mv-toc-on .mv-layout { display: block; }
   html.mv-active .mv-main { max-width: none; padding: 0; }
-  html.mv-active .markdown-body .mv-anchor { display: none; }
+  html.mv-active .markdown-body .mv-anchor,
+  html.mv-active .markdown-body .mv-copy { display: none; }
 }

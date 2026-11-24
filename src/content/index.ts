@@ -1,4 +1,5 @@
 import { renderMarkdown } from './render';
+import { addCopyButtons, renderMath, renderMermaid } from './enhance';
 import { loadSettings, onSettingsChanged, t, type Settings } from '../settings';
 
 const MARKDOWN_TYPES = ['text/plain', 'text/markdown', 'text/x-markdown'];
@@ -79,6 +80,9 @@ function main(source: string): void {
     const { html, title } = renderMarkdown(src, t('frontMatter'));
     article.innerHTML = html;
     raw.textContent = src;
+    addCopyButtons(article);
+    renderMath(article).catch((e) => console.warn('[Mark Viewport] math', e));
+    diagramsDark = null; // new content: (re)draw diagrams on the next applySettings
     document.title = title ?? fileName();
     buildToc();
     applySettings();
@@ -128,8 +132,22 @@ function main(source: string): void {
   // overlays the text) and then follows the toolbar button.
   let tocOpen: boolean | null = null;
 
+  // Mermaid colors are baked into the SVG, so diagrams are redrawn when the
+  // effective (light/dark) theme changes.
+  let diagramsDark: boolean | null = null;
+  const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+  function updateDiagrams(): void {
+    if (!settings) return;
+    const dark = settings.theme === 'dark' || (settings.theme === 'auto' && darkQuery.matches);
+    if (dark === diagramsDark) return;
+    diagramsDark = dark;
+    renderMermaid(article, dark).catch((e) => console.warn('[Mark Viewport] mermaid', e));
+  }
+  darkQuery.addEventListener('change', updateDiagrams);
+
   function applySettings(): void {
     if (!settings) return;
+    updateDiagrams();
     root.dataset.mvTheme = settings.theme;
     root.dataset.mvWidth = settings.width;
     root.style.setProperty('--mv-font-size', `${settings.fontSize}px`);

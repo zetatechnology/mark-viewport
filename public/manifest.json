@@ -26,6 +26,12 @@
   },
   "permissions": ["storage"],
   "host_permissions": ["file:///*"],
+  "web_accessible_resources": [
+    {
+      "resources": ["lazy/*"],
+      "matches": ["<all_urls>"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [
