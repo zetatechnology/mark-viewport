@@ -57,7 +57,8 @@ npm run serve      # http://127.0.0.1:5178/sample.md で test/sample.md を text
 ## 動作の仕組み
 
 - content script は URL のパスが `.md` / `.markdown` のページに注入されますが、実際に描画するのは `document.contentType` が `text/plain` / `text/markdown` のときだけです。GitHub の blob ページのような HTML ページには何もしません。
-- 自動リロードはローカルファイルのみが対象です。タブが表示されている間、1 秒ごとにバックグラウンドがファイルを読み直し、内容が変わったときだけ再描画します。
+- 自動リロードはローカルファイルのみが対象です。Chrome は `file://` を fetch / XHR で読むことを（ページからもサービスワーカーからも）許可しないため、タブが表示されている間、1 秒ごとに同じファイルを非表示の iframe で開き直します。iframe 内でも content script が動き、本文を `postMessage` で親ページに渡します。内容が変わったときだけ再描画します。iframe は毎回作り直すので、履歴は増えません。
+- 動作確認用に `node scripts/e2e.mjs`（描画）と `node scripts/e2e-reload.mjs`（ファイルを書き換えて自動リロードを確認）があります。どちらもビルド済みの拡張機能を Edge のヘッドレスモードに読み込んで動かします（Chrome 本体はコマンドラインからの拡張機能の読み込みを受け付けないため）。
 
 ## 制限事項
 
@@ -75,10 +76,9 @@ npm run zip            # 提出用の mark-viewport.zip を生成
 
 ### 権限まわりのメモ
 
-- 権限は `storage`、`file:///*`（自動リロード用）、content script の `.md` / `.markdown` URL のみです。審査フォームに書く権限の理由:
+- 権限は `storage` と、content script の `.md` / `.markdown` URL のみです。審査フォームに書く権限の理由:
   - **storage**：表示設定の保存
-  - **ホスト権限（file:///\*）**：ローカルの Markdown ファイルを読み直して、変更を反映するため
-  - **content script（\*.md, \*.markdown）**：Markdown ファイルを整形表示するため
+  - **content script（\*.md, \*.markdown）**：Markdown ファイルを整形表示するため（自動リロードも同じ URL の範囲で動作）
 - リモートコードは使用していません（すべてのライブラリを同梱しています）。データの収集もありません。プライバシー欄では「データを収集しない」を選べます。
 - 「ファイルの URL へのアクセスを許可する」はインストール後にユーザー自身が ON にする必要があります。ストアの説明文にも書いておきましょう。
 

@@ -8,7 +8,8 @@ import { promisify } from 'node:util';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 
-const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+// Edge by default: branded Chrome ignores --load-extension.
+const CHROME = process.env.CHROME_PATH ?? 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const shotArg = process.argv.indexOf('--screenshot');
 const shot = shotArg > 0 ? resolve(process.argv[shotArg + 1]) : null;
 
