@@ -1,0 +1,30 @@
+{
+  "name": "mark-viewport",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that renders Markdown files (local and remote) in the browser.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "icons": "node scripts/make-icons.mjs",
+    "serve": "node scripts/serve.mjs",
+    "zip": "npm run build && powershell -NoProfile -Command \"Compress-Archive -Path dist/* -DestinationPath mark-viewport.zip -Force\""
+  },
+  "dependencies": {
+    "dompurify": "^3.5.0",
+    "highlight.js": "^11.12.0",
+    "markdown-it": "^15.0.3",
+    "markdown-it-anchor": "^10.1.0",
+    "markdown-it-footnote": "^4.0.0",
+    "markdown-it-task-lists": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.3.7",
+    "@types/markdown-it": "^14.2.0",
+    "@types/markdown-it-footnote": "^3.0.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8"
+  }
+}

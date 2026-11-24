@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <title>Mark Viewport</title>
+  <style>
+    :root { --fg: #1f2328; --muted: #59636e; --border: #d1d9e0; --bg: #fff; --ok: #1a7f37; --warn: #9a6700; }
+    @media (prefers-color-scheme: dark) {
+      :root { --fg: #f0f6fc; --muted: #9198a1; --border: #3d444d; --bg: #0d1117; --ok: #3fb950; --warn: #d29922; }
+    }
+    body { margin: 0; padding: 16px 20px 20px; min-width: 360px; font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Hiragino Sans", Meiryo, sans-serif; color: var(--fg); background: var(--bg); }
+    h1 { font-size: 16px; margin: 0 0 12px; }
+    h2 { font-size: 13px; margin: 20px 0 6px; color: var(--muted); }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .row:last-of-type { border-bottom: 0; }
+    select, input[type=number] { font: inherit; padding: 2px 6px; }
+    input[type=number] { width: 64px; }
+    #status { height: 18px; margin-top: 8px; color: var(--ok); font-size: 12px; }
+    #file-access { margin: 0 0 8px; }
+    #file-access.off { color: var(--warn); }
+    button { font: inherit; padding: 4px 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1 data-i18n="optionsTitle"></h1>
+
+  <label class="row"><span data-i18n="optTheme"></span>
+    <select id="theme">
+      <option value="auto" data-i18n="optThemeAuto"></option>
+      <option value="light" data-i18n="optThemeLight"></option>
+      <option value="dark" data-i18n="optThemeDark"></option>
+    </select>
+  </label>
+  <label class="row"><span data-i18n="optWidth"></span>
+    <select id="width">
+      <option value="normal" data-i18n="optWidthNormal"></option>
+      <option value="wide" data-i18n="optWidthWide"></option>
+      <option value="full" data-i18n="optWidthFull"></option>
+    </select>
+  </label>
+  <label class="row"><span data-i18n="optFontSize"></span>
+    <input id="fontSize" type="number" min="10" max="32" step="1">
+  </label>
+  <label class="row"><span data-i18n="optToc"></span>
+    <input id="toc" type="checkbox">
+  </label>
+  <label class="row"><span data-i18n="optAutoReload"></span>
+    <input id="autoReload" type="checkbox">
+  </label>
+
+  <h2 data-i18n="fileAccessHeading"></h2>
+  <p id="file-access"></p>
+  <button id="open-details" type="button" data-i18n="openDetails" hidden></button>
+
+  <div id="status"></div>
+  <script src="options.js"></script>
+</body>
+</html>
