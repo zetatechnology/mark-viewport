@@ -5,10 +5,22 @@ version: 2.4.0
 
 # Acme CLI
 
-A fast, friendly command-line tool for managing **Acme** projects. Works on macOS, Linux and Windows.
+A fast, friendly command-line tool for managing **Acme** projects. Works on macOS, Linux and Windows. :rocket:
 
-> **Note**
+> [!NOTE]
 > Version 2.4 adds workspace support. See the [migration guide](#migrating-from-23) if you are upgrading.
+
+## How it works
+
+```mermaid
+flowchart LR
+  A[acme.config.ts] --> B(Acme CLI)
+  B --> C{Workspace?}
+  C -->|yes| D[Build each service]
+  C -->|no| E[Build project]
+  D --> F[(Cache)]
+  E --> F
+```
 
 ## Installation
 

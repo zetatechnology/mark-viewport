@@ -54,6 +54,24 @@ async function canWrite(handle: FileSystemFileHandle): Promise<boolean> {
   return (await handle.requestPermission?.(opts)) === 'granted';
 }
 
+/**
+ * `text` uses \n line breaks (the page and the textarea both fold CRLF), so
+ * the file's own style is taken from the file on disk: CRLF and a UTF-8 BOM
+ * are kept when the file being overwritten has them.
+ */
+async function matchFileStyle(handle: FileSystemFileHandle, text: string): Promise<string> {
+  let head: Uint8Array;
+  try {
+    head = new Uint8Array(await (await handle.getFile()).slice(0, 64 * 1024).arrayBuffer());
+  } catch {
+    return text; // new or unreadable file: plain \n
+  }
+  const bom = head[0] === 0xef && head[1] === 0xbb && head[2] === 0xbf;
+  const lf = head.indexOf(0x0a);
+  const crlf = lf > 0 && head[lf - 1] === 0x0d;
+  return (bom ? '﻿' : '') + (crlf ? text.replace(/\n/g, '\r\n') : text);
+}
+
 export const pickerSupported = typeof window.showSaveFilePicker === 'function';
 
 export type SaveResult =
@@ -92,8 +110,9 @@ export class FileSaver {
           types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown'] } }],
         });
       }
+      const out = await matchFileStyle(handle, text);
       const w = await handle.createWritable();
-      await w.write(text);
+      await w.write(out);
       await w.close();
       if (handle !== this.handle) {
         this.handle = handle;

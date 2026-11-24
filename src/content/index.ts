@@ -5,6 +5,8 @@ import { loadSettings, onSettingsChanged, t, type Settings } from '../settings';
 
 const MARKDOWN_TYPES = ['text/plain', 'text/markdown', 'text/x-markdown'];
 const RELOAD_INTERVAL_MS = 1000;
+const PROBE_PARAM = 'mv-probe';
+const PROBE_MESSAGE = 'mark-viewport:probe';
 
 declare global {
   interface Window {
@@ -203,11 +205,11 @@ function main(source: string): void {
 
 
   // ---- Editing ----
-  // `current` is the file as last read from / written to disk. The textarea
-  // normalizes line breaks to \n, so the file's own style is restored on save.
+  // `current` is the file as last read from / written to disk. Line breaks are
+  // compared as \n: the page text and the textarea both fold CRLF, and the
+  // saver writes the file's own line-break style back (see save.ts).
   const saver = new FileSaver(location.href.split('#')[0], fileName());
   let editing = false;
-  let eol = /\r\n/.test(source) ? '\r\n' : '\n';
   let saving = false;
   let saveAgain = false;
   let conflict = false;
@@ -287,14 +289,13 @@ function main(source: string): void {
     }
     saving = true;
     const text = editor.value;
-    const out = eol === '\n' ? text : text.replace(/\n/g, eol);
     setStatus(t('saving'));
     let again = false;
     try {
-      const res = await saver.save(out, { pickNew });
+      const res = await saver.save(text, { pickNew });
       if (res.ok) {
         if (res.method === 'file') {
-          current = out;
+          current = text;
           conflict = false;
         }
         const other = res.method === 'file' && res.name !== fileName() ? ` → ${res.name}` : '';
@@ -327,7 +328,6 @@ function main(source: string): void {
       return;
     }
     current = text;
-    eol = /\r\n/.test(text) ? '\r\n' : '\n';
     if (editing) {
       const { selectionStart, selectionEnd, scrollTop } = editor;
       editor.value = normalize(text);
@@ -378,18 +378,42 @@ function main(source: string): void {
   });
 
   // ---- Auto reload (local files only) ----
+  // Reading a file:// URL with fetch/XHR is refused by Chrome (from both the
+  // page and the service worker). Instead, load the same file into a hidden
+  // iframe: that is an ordinary navigation, and this content script runs in
+  // the frame too and posts the text back (see the probe handling below).
   let timer: number | undefined;
   let inFlight = false;
+  let failures = 0;
+  let probeSeq = 0;
 
-  async function readSelf(): Promise<string | null> {
-    const url = location.href.split('#')[0];
-    try {
-      const res = await chrome.runtime.sendMessage({ type: 'fetch-file', url });
-      if (res?.ok) return res.text as string;
-    } catch {
-      /* extension reloaded or worker unavailable */
-    }
-    return null;
+  function readSelf(): Promise<string | null> {
+    return new Promise((resolve) => {
+      // A fresh iframe per read: re-navigating an existing one would add a
+      // session-history entry each time and break the Back button.
+      const id = `${++probeSeq}`;
+      const url = new URL(location.href);
+      url.hash = '';
+      url.searchParams.set(PROBE_PARAM, id);
+      const frame = el('iframe', 'mv-probe');
+      frame.hidden = true;
+      frame.tabIndex = -1;
+      frame.setAttribute('aria-hidden', 'true');
+      frame.src = url.href;
+      const done = (text: string | null) => {
+        clearTimeout(timeout);
+        window.removeEventListener('message', onMessage);
+        frame.remove();
+        resolve(text);
+      };
+      const onMessage = (e: MessageEvent) => {
+        if (e.source !== frame.contentWindow || e.data?.type !== PROBE_MESSAGE || e.data.id !== id) return;
+        done(typeof e.data.text === 'string' ? e.data.text : null);
+      };
+      const timeout = window.setTimeout(() => done(null), 5000);
+      window.addEventListener('message', onMessage);
+      document.body.append(frame);
+    });
   }
 
   async function poll(): Promise<void> {
@@ -397,14 +421,25 @@ function main(source: string): void {
     inFlight = true;
     try {
       const text = await readSelf();
-      if (text != null && text !== current) externalChange(text);
+      root.dataset.mvReload = text == null ? 'failed' : 'ok'; // for diagnostics and the e2e test
+      if (text == null) {
+        // e.g. the file was deleted or renamed. Give up after a few tries.
+        if (++failures >= 3) {
+          console.info('[Mark Viewport] Auto-reload stopped: the file could not be read.');
+          updateReload();
+        }
+        return;
+      }
+      failures = 0;
+      // The page's text has CRLF already folded to LF by the HTML parser.
+      if (normalize(text) !== normalize(current)) externalChange(text);
     } finally {
       inFlight = false;
     }
   }
 
   function updateReload(): void {
-    const want = location.protocol === 'file:' && !!settings?.autoReload;
+    const want = location.protocol === 'file:' && !!settings?.autoReload && failures < 3;
     if (want && timer === undefined) timer = window.setInterval(poll, RELOAD_INTERVAL_MS);
     if (!want && timer !== undefined) {
       clearInterval(timer);
@@ -434,7 +469,16 @@ function main(source: string): void {
   chrome.runtime.sendMessage({ type: 'rendered' }).catch(() => {});
 }
 
-if (!window.__markViewportLoaded) {
+if (window !== window.top) {
+  // Frames are never rendered. The only frame we act in is our own auto-reload
+  // probe (a hidden iframe of the same file): hand its text to the parent.
+  const id = new URLSearchParams(location.search).get(PROBE_PARAM);
+  if (id && location.protocol === 'file:' && MARKDOWN_TYPES.includes(document.contentType)) {
+    const pre = document.body?.querySelector(':scope > pre');
+    const text = pre ? pre.textContent ?? '' : document.body?.innerText ?? '';
+    window.parent.postMessage({ type: PROBE_MESSAGE, id, text }, '*');
+  }
+} else if (!window.__markViewportLoaded) {
   const source = extractSource();
   if (source != null) {
     window.__markViewportLoaded = true;
