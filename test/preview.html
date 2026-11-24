@@ -1,0 +1,45 @@
+<!doctype html>
+<!--
+  Dev harness: renders a .md from this server with the built content script and a
+  stubbed `chrome` API, so the viewer can be checked without loading the extension.
+  Usage: npm run build && npm run serve, then open /preview.html?file=sample.md&theme=dark
+-->
+<html>
+<head><meta charset="utf-8"><link rel="stylesheet" href="/content.css"></head>
+<body>
+<script type="module">
+  const params = new URLSearchParams(location.search);
+  const file = params.get('file') ?? 'sample.md';
+  const theme = params.get('theme') ?? 'auto';
+  const lang = params.get('lang') ?? 'ja';
+  const [md, msgs] = await Promise.all([
+    fetch(`/${file}`).then((r) => r.text()),
+    fetch(`/_locales/${lang}/messages.json`).then((r) => r.json()),
+  ]);
+  const pre = document.createElement('pre');
+  pre.textContent = md;
+  document.body.replaceChildren(pre);
+  Object.defineProperty(document, 'contentType', { get: () => 'text/plain' });
+  history.replaceState(null, '', `/${file}${location.search}${location.hash}`);
+  // Settings can be changed live from the console: mvSetTheme("dark")
+  let settings = { theme };
+  const listeners = [];
+  window.mvSetTheme = (t) => { settings = { ...settings, theme: t }; listeners.forEach((cb) => cb({}, "sync")); };
+  window.chrome = {
+    i18n: { getMessage: (k) => msgs[k]?.message ?? '' },
+    storage: {
+      sync: { get: async (d) => ({ ...d, ...settings }), set: async () => {} },
+      onChanged: { addListener: (cb) => listeners.push(cb) },
+    },
+    runtime: {
+      getURL: (p) => new URL(`/${p}`, location.origin).href,
+      sendMessage: async () => ({ ok: false }),
+      onMessage: { addListener() {} },
+    },
+  };
+  const s = document.createElement('script');
+  s.src = '/content.js';
+  document.body.append(s);
+</script>
+</body>
+</html>

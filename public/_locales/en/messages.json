@@ -23,5 +23,10 @@
   "fileAccessHeading": { "message": "Local files" },
   "fileAccessOn": { "message": "File URL access is allowed. Local .md files will be rendered." },
   "fileAccessOff": { "message": "To render local .md files, turn on “Allow access to file URLs” on the extension's details page." },
-  "openDetails": { "message": "Open extension details" }
+  "openDetails": { "message": "Open extension details" },
+  "copy": { "message": "Copy" },
+  "copyCode": { "message": "Copy code" },
+  "copied": { "message": "Copied" },
+  "copyFailed": { "message": "Copy failed" },
+  "diagramError": { "message": "Could not render diagram" }
 }

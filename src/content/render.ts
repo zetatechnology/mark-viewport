@@ -2,8 +2,10 @@ import MarkdownIt from 'markdown-it';
 import anchor from 'markdown-it-anchor';
 import footnote from 'markdown-it-footnote';
 import taskLists from 'markdown-it-task-lists';
+import { full as emoji } from 'markdown-it-emoji';
 import hljs from 'highlight.js/lib/common';
 import DOMPurify from 'dompurify';
+import { alerts, fences, math } from './plugins';
 
 // GitHub-like slug: lowercase, drop punctuation, spaces -> hyphens. Keeps CJK.
 export function slugify(s: string): string {
@@ -41,7 +43,12 @@ const md = new MarkdownIt({
     permalink: anchor.permalink.ariaHidden({ placement: 'before', symbol: '#', class: 'mv-anchor' }),
   })
   .use(footnote)
-  .use(taskLists, { enabled: false, label: true });
+  .use(taskLists, { enabled: false, label: true })
+  // GitHub converts :shortcodes: but not ASCII smileys like :) or :-(
+  .use(emoji, { shortcuts: {} })
+  .use(math)
+  .use(fences)
+  .use(alerts);
 
 const FRONT_MATTER = /^---[ \t]*\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/;
 

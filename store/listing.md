@@ -25,7 +25,9 @@ Mark Viewport は、ブラウザで開いた Markdown ファイル（.md / .mark
 ■ 主な機能
 ・ローカルの .md ファイルや、Web 上の生テキストの .md を自動で整形表示
 ・表、タスクリスト、打ち消し線、自動リンク、脚注に対応（GitHub Flavored Markdown）
-・コードブロックのシンタックスハイライト
+・コードブロックのシンタックスハイライトとコピーボタン
+・Mermaid の図（フローチャート、シーケンス図など）と数式（$…$ / $$…$$ を KaTeX で表示）
+・GitHub のアラート（> [!NOTE] など）と絵文字ショートコード（:tada:）
 ・見出しから自動生成される目次サイドバー（現在位置をハイライト）
 ・ダークモード（OS の設定に連動、または手動で切り替え）
 ・ローカルファイルを保存すると表示が自動で更新（エディタと並べてプレビューに便利）
@@ -48,7 +50,9 @@ Mark Viewport renders Markdown files (.md / .markdown) opened in your browser wi
 Features
 • Automatically renders local .md files and raw .md files on the web
 • GitHub Flavored Markdown: tables, task lists, strikethrough, autolinks, footnotes
-• Syntax highlighting for code blocks
+• Syntax highlighting for code blocks, with a copy button
+• Mermaid diagrams (flowcharts, sequence diagrams, and more) and math ($…$ / $$…$$, rendered with KaTeX)
+• GitHub alerts (> [!NOTE] etc.) and emoji shortcodes (:tada:)
 • Table of contents sidebar generated from headings, with the current section highlighted
 • Dark mode (follows your OS, or set it manually)
 • Auto-reloads local files when you save them — handy as a live preview next to your editor
