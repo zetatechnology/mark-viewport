@@ -11,3 +11,19 @@ declare module 'markdown-it-emoji' {
   export const light: Plugin;
   export const bare: Plugin;
 }
+
+// File System Access API pieces not yet in TypeScript's DOM lib.
+interface FileSystemHandlePermissionDescriptor {
+  mode?: 'read' | 'readwrite';
+}
+interface FileSystemHandle {
+  queryPermission?(d?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
+  requestPermission?(d?: FileSystemHandlePermissionDescriptor): Promise<PermissionState>;
+}
+interface SaveFilePickerOptions {
+  suggestedName?: string;
+  types?: { description?: string; accept: Record<string, string[]> }[];
+}
+interface Window {
+  showSaveFilePicker?(options?: SaveFilePickerOptions): Promise<FileSystemFileHandle>;
+}
