@@ -16,20 +16,20 @@ const CHROME =
 // Absolute: Chrome does not resolve --screenshot paths against our cwd.
 const OUT = resolve('store/assets');
 
-const TYPES = { '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json' };
+const TYPES = { '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.json': 'application/json', '.woff2': 'font/woff2' };
 const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
 
 const scenes = {
-  // name: { theme, action (JS run after render) }
-  'screenshot-1-light': { theme: 'light', action: '' },
+  // name: { file, theme, action (JS run after render) }
   // Headless --screenshot does not capture a scrolled viewport, so every scene
-  // shows the top of the page.
-  'screenshot-2-dark': { theme: 'dark', action: '' },
-  'screenshot-3-source': { theme: 'light', action: `document.querySelectorAll('.mv-btn')[1].click();` },
+  // shows the top of its document.
+  'screenshot-1-light': { file: 'store/demo.md', theme: 'light', action: '' },
+  'screenshot-2-dark': { file: 'store/demo-notes.md', theme: 'dark', action: '' },
+  'screenshot-3-source': { file: 'store/demo.md', theme: 'light', action: `document.querySelectorAll('.mv-btn')[1].click();` },
 };
 
-async function shotPage(theme, action) {
-  const md = await readFile('store/demo.md', 'utf8');
+async function shotPage({ file, theme, action }) {
+  const md = await readFile(file, 'utf8');
   const messages = await readFile('dist/_locales/en/messages.json', 'utf8');
   return `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="/content.css"></head><body><pre>${esc(md)}</pre>
 <script>
@@ -38,7 +38,7 @@ const msgs = ${messages};
 window.chrome = {
   i18n: { getMessage: (k) => msgs[k]?.message ?? '' },
   storage: { sync: { get: async (d) => ({ ...d, theme: ${JSON.stringify(theme)} }), set: async () => {} }, onChanged: { addListener() {} } },
-  runtime: { sendMessage: async () => ({ ok: false }), onMessage: { addListener() {} } },
+  runtime: { getURL: (p) => new URL('/' + p, location.origin).href, sendMessage: async () => ({ ok: false }), onMessage: { addListener() {} } },
 };
 </script>
 <script src="/content.js"></script>
@@ -66,7 +66,7 @@ const server = createServer(async (req, res) => {
   try {
     if (url.pathname.startsWith('/shot/') && url.pathname.endsWith('.md')) {
       const s = scenes[url.pathname.slice(6, -3)];
-      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(await shotPage(s.theme, s.action));
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(await shotPage(s));
     } else if (url.pathname === '/promo.html') {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }).end(await promoPage());
     } else {
@@ -95,7 +95,7 @@ async function capture(url, file, w, h) {
     '--no-first-run',
     `--user-data-dir=${profile}`,
     `--window-size=${w},${h}`,
-    '--virtual-time-budget=3000',
+    '--virtual-time-budget=20000',
     `--screenshot=${file}`,
     url,
   ], { timeout: 60000 });

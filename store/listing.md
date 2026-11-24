@@ -95,10 +95,10 @@ Render Markdown files opened in the browser as formatted documents.
 Used to save display settings (theme, content width, font size, table of contents, auto-reload on/off).
 ```
 
-**ホスト権限（file:///\* と、content script の \*.md / \*.markdown の URL）**
+**ホスト権限（content script の \*.md / \*.markdown の URL）**
 ```
-URL が .md / .markdown で終わるページにのみ content script を挿入し、そのページがプレーンテキストの Markdown である場合に限り整形表示します。file:/// へのアクセスは、表示中のローカル Markdown ファイルを読み直して、ユーザーが保存した変更を表示に反映（自動リロード）するために使用します。それ以外のページやファイルにはアクセスしません。
-A content script is injected only into pages whose URL ends in .md or .markdown, and renders them only when the page is a plain-text Markdown document. Access to file:/// is used to re-read the local Markdown file currently shown in the tab so that saved changes are reflected (auto-reload). No other pages or files are accessed.
+URL が .md / .markdown で終わるページにのみ content script を挿入し、そのページがプレーンテキストの Markdown である場合に限り整形表示します。ローカルファイルの自動リロードでは、表示中の同じファイルを非表示の iframe で開き直して変更を検出します。それ以外のページやファイルにはアクセスしません。
+A content script is injected only into pages whose URL ends in .md or .markdown, and renders them only when the page is a plain-text Markdown document. For local files, auto-reload re-opens the same file in a hidden iframe to detect saved changes. No other pages or files are accessed.
 ```
 
 **リモートコードの使用**
